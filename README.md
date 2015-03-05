@@ -1,6 +1,8 @@
 Restaurant Menu Inference
+=========================
 
 Jason Jennings        Nicholas Early
+====================================
 
 Objective
 =========
@@ -16,49 +18,49 @@ Data Mining Tasks
 
 To implement this system, several data mining concepts will be used.
 
-Classification
+*Classification*
 
 This project will likely involve multiple levels of classifiers. One classifier may determine if a sentence is talking about food or not, while the second classifier may determine which terms in the sentence are the food item.
 
-Data Wrangling
+*Data Wrangling*
 
 The system will involve processing text data (natural language). The data must be cleaned and converted to a consistent format to ensure the system performs well.
 
-Natural Language Processing
+*Natural Language Processing*
 
 The system will be aided by the use of natural language processing techniques, such as part of speech tagging, to determine important features of sentences relevant to our goal (finding noun phrases, for example, will be very helpful).
 
 Deliverables
 ============
 
-Website
+*Website*
 
 The primary deliverable will be a website which will allow a user to browse restaurants in the dataset and view the inferred menu items.
 
-Presentation
+*Presentation*
 
 The presentation will primarily be a demo of the website. Additionally, we may provide examples of data as it goes through the entire process of being classified.
 
 Challenges
 ==========
 
-Data Labeling
+*Data Labeling*
 
 The yelp dataset does not contain any ground truth data for restaurant menu items. This means we will need to hand label data in order to implement this system.
 
 Resolution: We will develop a small application that allows us to quickly label data. We may attempt to use unsupervised learning techniques such as clustering to help us with labeling.
 
-Data Cleaning
+*Data Cleaning*
 
 People misspell words, speak in incomplete sentences, use inconsistent capitalization and punctuation.
 
 Resolution: We will rely on existing libraries such as NLTK to help us clean data so that it is as consistent as possible.
 
-Natural Language
+*Natural Language*
 
 Natural language is tricky. It may be hard to recognize menu items in complex sentences. We may limit the scope of our project to identifying food items in sentences with certain structure.
 
-Extraneous Data
+*Extraneous Data*
 
 It is not uncommon for restaurant reviews to contain mentions of dishes from other restaurants. Our system may not be able to eliminate these as possible menu items.
 
@@ -69,7 +71,7 @@ Implementation
 
 Our project will primarily be written in python, making use of popular data wrangling, machine learning, and natural language processing libraries such as pandas, scikit-learn, and nltk.
 
-Preliminary Design
+*Preliminary Design*
 
 An early design (subject to change as we do more research) is that we will implement two stages of classifiers.
 
@@ -82,20 +84,20 @@ Additionally, some information retrieval techniques may be used to match a possi
 Evaluation
 ==========
 
-Quantitative
+*Quantitative*
 
 Our classifiers will be evaluated quantitatively, based on common statistics such as error rate.
 
 We may also compare the results to ground truth results for a small set of restaurants where the ground-truth menu items may be easily available.
 
-Qualitative
+*Qualitative*
 
 Qualitative performance will also be taken into account. Do the menu items inferred from review text seem reasonable?
 
 Project Roles
 =============
 
-Nicholas Early
+*Nicholas Early*
 
 Will focus on classifier determining if a sentence is mentioning food.
 
@@ -103,7 +105,7 @@ Expected to do 50% of the data labeling for the entire project.
 
 Will do front-end design for website.
 
-Jason Jennings
+*Jason Jennings*
 
 Will focus on classifier determining which terms in a sentence are the possible menu item.
 
