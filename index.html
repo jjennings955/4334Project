@@ -1,0 +1,42 @@
+<!--
+id is 0 if restaurant is not chosen yet
+-->
+
+<!-- hyper links for restaurants -->
+<h1 style="text-align: center;">Restaurants</h1>
+<div style="text-align: center;">
+    {% for bid,bname in business_info.items() %}
+    <a href={{bid}}>{{bname}}</a>
+    {%endfor%}
+</div>
+
+<br />
+<br />
+
+<!-- Restaurant name -->
+<h1 style="text-align: center;">{{business_info[id]}}</h1>
+
+<br />
+<br />
+
+{% if id != 0 %}
+<!-- randomly show 10 reviews of chosen restaurant -->
+<div style="float: left; position: relative; padding-left: 10%" >
+<h2>Reviews</h2> <br />
+{% for review in reviews %}
+{{ review }} <br />
+{%endfor%}
+</div>
+
+<!-- menu of food items -->
+<div style="float: right; position: relative; padding-right: 10%" >
+<h2>Menu</h2> <br />
+<ul>
+{% for food in menu %}
+<li>{{ food }}</li>
+{%endfor%}
+</ul>
+</div>
+
+<br />
+{%endif%}
