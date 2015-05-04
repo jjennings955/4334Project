@@ -1,21 +1,10 @@
 <html lang="en"><head>
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
 <!--
 id is 0 if restaurant is not chosen yet
 -->
 
-Jason Jennings and Nicholas Early <br/>
-
-
-
-
-
-
-
-
-
-
+    Jason Jennings and Nicholas Early <br/>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -24,12 +13,6 @@ Jason Jennings and Nicholas Early <br/>
     <meta name="author" content="">
 
     <title>Business Frontpage - Start Bootstrap Template</title>
-
-    <!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <link href="css/business-frontpage.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -80,43 +63,58 @@ Jason Jennings and Nicholas Early <br/>
 
 
     <!-- hyper links for restaurants -->
-    <h1 style="text-align: center; padding-top: 50px;">Restaurants</h1>
-    <div style="text-align: center;">
-        {% for bid,bname in business_info.items() %}
-        <a href={{bid}}>{{bname}}</a>
-        {%endfor%}
-    </div>
+    <h1 style="text-align: center; padding-top: 50px;">Interactively Classify Foods</h1>
 
-    <!-- Image Background Page Header -->
-    <!-- Note: The background image is set within the business-casual.css file. -->
-    <header class="business-header">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h1 class="tagline">{{business_info[id]}}</h1>
-                </div>
-            </div>
-        </div>
-    </header>
 
     <!-- Page Content -->
     <div class="container">
+    <p>Enter a sentence or a paragraph in the text box below. Our system will attempt to extract all Menu Items
+    mentioned in the entered paragraph. Below are a few examples to try (copy and paste into the form). Otherwise,
+        enter your own sentence. For best results, try to use proper punctuation and grammar!
+    <br>
+        <h2>A review taken from Fuzzy's Taco Shop in Arlington, TX</h2>
+        <code>
+            I love this place! Everything is so tasty... from the breakfast to the cocktails. We eat here at least 2 times a week. I highly recommend the Chicken Chilaquiles with latin potatoes and refried beans, Grilled Shrimp Salad, the Taco platter is greatness too, just to name a few. The thing that keeps me coming back other than the wonderful food is that you can mix amd match, customize the menu to your taste and preference. That is huge for me considering I am gluten intolerant. Thanks, Fuzzy's!
+        </code>
+        <hr/>
+        <h2>A review taken from The Grease Monkey in Arlington, TX</h2>
+        <code>
+            If you want a really good burger and a nice cold beer this is the place for you. We come here about once a month and the burgers are some of the best I've had.
 
+This little burger joint / sports bar / dive bar is two separate business in one. One side of the place you order you food and the other side is the bar / eating area. I hear you can order food at the bar but I never have.
+
+I normally get the Roasted Red Pepper Burger or Fried Portobello Mushroom Burger. My other half normally has the Angry Burger (sometime spicy and other times it will set you on fire). Recently I had the Chicken Fried Burger which, to my surprise, was very very good.
+
+The homemade fries are good but nothing to write home about. The onion rings used to be extremely good but they have changed them and now they are below average. The burgers are big enough so split an order of fries they are plenty big enough for two.
+
+The bar is a full bar. I normally just get the beer. They have a wide assortment of Craft beers on tap and in bottles.
+
+Good food and good beer, what more could you ask for.
+        </code>
+        <hr/>
+        <h2>A review taken from Buca Di Beppo Italian Restaurant in Southlake</h2>
+    </p>
         <hr>
 
         <div class="row">
-            <div class="col-sm-8">
-                <h2>Reviews</h2>
-                {% for review in reviews %}
-                {{ review }} <hr> <br />
-                {%endfor%}
-            </div>
-            <div class="col-sm-4">
-                <h2>Menu</h2>
-                {% for food in menu %}
-                <li>{{ food }}</li>
-                {%endfor%}
-            </div>
+
+            <div class="col-sm-12">
+                <form>
+                <form action="#" id="usrform">
+                    <textarea class="col-sm-8" id="comment" name="comment" form="usrform">I went to McDonalds and ordered a spicy chicken sandwich.</textarea>
+                    <button id="submitbtn">Submit</button>
+                  <!--<input id="submitbtn" type="submit">-->
+                </form>
+
+
+                </form>
+
+                <div id="res-parent" class="col-sm-8">
+                     <h2>Results</h2>
+                    <div id="res">
+                    </div>
+
+                </div>
         </div>
         <!-- /.row -->
 
@@ -137,12 +135,34 @@ Jason Jennings and Nicholas Early <br/>
     <!-- /.container -->
 
     <!-- jQuery -->
-    <script src="js/jquery.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script>
+        $('#res-parent').hide();
+        $('#submitbtn').click(function()
+        {
+            var output = '';
+            $.post("/classify", {'text' : $('#comment').val() }, function(result)
+            {
+                for (var i = 0; i < Object.keys(result).length; i++)
+                {
+                    if (result[i][3] == true)
+                    {
+                        output = output + "<br/><strong>" + result[i][2] + " " + result[i][3] + "</strong><hr/>";
+                    }
+                    else
+                    {
+                        output = output + "<br/>" + result[i][2] + " " + result[i][3] + "<hr/>";
+                    }
+                    $('#res').html(output);
+                }
+                $('#res-parent').show();
+            });
 
 
-
-
+            return false;
+        });
+    </script>
 </body></html>

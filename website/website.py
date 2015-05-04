@@ -1,30 +1,40 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
+import pandas as pd
+import subprocess
+import joblib
+from nltk.tokenize import RegexpTokenizer, punkt
+
+tokenizer = RegexpTokenizer("[a-zA-Z]+")
+punkt_tok = punkt.PunktSentenceTokenizer()
+
+def tokenize(x):
+    return tokenizer.tokenize(x)
+from reverb import tokenize, ReverbClassifier
+rev = ReverbClassifier()
 app = Flask(__name__)
 
+#data = pd.read_csv('')
+
 @app.route('/')
-@app.route('/<id>')
 def main(id=0):
 
-    # business_info = {business_id, business_name}
-    business_info = dict([("1",'Taco Bell'), ("2","McDonald's")])
 
-    # business_name = business name
-    # business_name = business_info[id]
+    return render_template('index.html')
 
-    # reviews = reviews of chosen restaurant
-    reviews = ['Me like.', 'Tacos are good.']
+@app.route('/classify', methods=['POST'])
+def classify():
+    text = request.form['text']
 
-    # menu = list of strings
-    menu = ['Taco', 'Quesadilla']
+    sentences = punkt_tok.tokenize(text)
+    out = []
+    for sentence in sentences:
+        words = tokenize(sentence)
+        cleaned = ' '.join(words) + '.'
+        out.append(cleaned)
+    result = list(rev.get_tuples(out))
+    print(list(result))
+    return jsonify(dict(zip(range(len(result)), result)))
 
-    '''
-    arg1 = dictionary
-    arg2 = chosen business id
-    arg3 = chosen business reviews
-    arg4 = menu
-    '''
-    return render_template('index.html', business_info=business_info, id=id,
-                           reviews=reviews, menu=menu)
 
 if __name__ == '__main__':
     app.run(debug=True)

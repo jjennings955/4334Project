@@ -1,0 +1,154 @@
+{
+ "metadata": {
+  "name": "Build Model - Ridge Regression"
+ },
+ "nbformat": 3,
+ "nbformat_minor": 0,
+ "worksheets": [
+  {
+   "cells": [
+    {
+     "cell_type": "heading",
+     "level": 1,
+     "metadata": {},
+     "source": "Build Final Model used in Demonstration App"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "import numpy as np\nimport pandas as pd\nimport scipy.sparse\nimport joblib\n\nfrom nltk.tokenize import RegexpTokenizer\nfrom sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.feature_extraction.text import CountVectorizer\nfrom sklearn.naive_bayes import BernoulliNB\nfrom sklearn.linear_model import RidgeClassifierCV, RidgeClassifier",
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 7
+    },
+    {
+     "cell_type": "heading",
+     "level": 1,
+     "metadata": {},
+     "source": "Read Data"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "d = pd.read_csv(r'./data/sorted_out_2.csv', delimiter='\\t', error_bad_lines=False, warn_bad_lines=False)\nd.columns=[u'filename', u'sentence number', u'arg1', u'rel', u'arg2', u'arg1 start', u'arg1 end', u'rel start', u'rel end', u'arg2 start', u'arg2 end', u'conf', u'words', u'tags', u'chunks', u'a1norm', u'relnorm', u'a2norm']\n\nd.dropna(inplace=True)\n\n\n# Read in the labeled training data\nd2 = pd.read_csv('./data/labeled_data.csv', delimiter=',')\n\n# Make sure the column names are properly assigned\nd2.columns = ['arg1', 'rel', 'arg2', 'label']\n\n# Fill in any unfilled label values as false\nd2['label'].fillna(0.0,inplace=True)\n#d2.dropna(inplace=True)\n\n# Read the 'common non foods' file -- this file contains data where arg2 does not contain\n# foods. It is very large and should be sampled to keep the class distribution of the training data somewhate equal\nnon_foods = pd.read_csv('./data/common_non_foods.csv', delimiter=',')\n\n\n# Shuffle the data so we can sample by selecting the first N elements\nnon_foods = non_foods.reindex(index=np.random.permutation(len(non_foods)))\nnon_foods.dropna(inplace=True)",
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 8
+    },
+    {
+     "cell_type": "heading",
+     "level": 1,
+     "metadata": {},
+     "source": "Build Features"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "\n\n# Generate a binary feature vector for each column of our data. \n# We do not apply stemming, or stopword removal. We do convert to lowercase.\n#tok = \n#def tokenize(x):\n#    return tok.tokenize(x)\ntokenizer = RegexpTokenizer(\"[a-zA-Z]+\")\ndef tokenize(x):\n    return tokenizer.tokenize(x)\nclass Vectorizer:\n    def __init__(self, vectorizers=None):\n        #self.tokenizer = RegexpTokenizer(\"[a-zA-Z]+\")\n        if vectorizers:\n            self.arg1_vectorizer, self.rel_vectorizer, self.arg2_vectorizer = vectorizers\n        else:\n            self.arg2_vectorizer = CountVectorizer(binary=True, tokenizer=tokenize, stop_words=None, max_df=20000, min_df=5, lowercase=True)\n            self.rel_vectorizer = CountVectorizer(binary=True, tokenizer=tokenize, stop_words=None, min_df=1000, lowercase=True)        \n            self.arg1_vectorizer = CountVectorizer(binary=True, tokenizer=tokenize, stop_words=None, min_df=1000, lowercase=True)\n    def fit(self, a1, rel, a2):\n        self.arg1_vectorizer.fit(a1)\n        self.arg2_vectorizer.fit(a2)\n        self.rel_vectorizer.fit(rel)\n    def transform(self, arg1, rel, arg2):\n        a2_feat = self.arg2_vectorizer.transform(arg2) # \"arg2\" features\n        rel_feat = self.rel_vectorizer.transform(rel) # \"rel\" features\n        a1_feat = self.arg1_vectorizer.transform(arg1) # \"arg1\" features\n        return (rel_feat, a1_feat, a2_feat)\n        \nvectorizer = Vectorizer()\nvectorizer.fit(d['arg1'].values, d['rel'].values, d['arg2'].values)\n",
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 9
+    },
+    {
+     "cell_type": "heading",
+     "level": 1,
+     "metadata": {},
+     "source": "Generate Dataset"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "# NOTE THE ORDER: rel, arg1, arg2\n#X = scipy.sparse.hstack((rel_features, arg1_features, arg2_features))\n\nX = scipy.sparse.hstack(vectorizer.transform(d2['arg1'].values, d2['rel'].values, d2['arg2'].values))\nX2 = scipy.sparse.hstack(vectorizer.transform(non_foods['arg1'].values[0:3000], non_foods['rel'].values[0:3000], non_foods['arg1'].values[0:3000]))\nX = scipy.sparse.vstack((X,X2))\ny = np.hstack((d2['label'].values, non_foods['label'].values[0:3000]))",
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 10
+    },
+    {
+     "cell_type": "heading",
+     "level": 1,
+     "metadata": {},
+     "source": "Do a Train/Test Split"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "X = X.todense()\npermutation = np.random.permutation(len(y))\nX = X[permutation]\ny = y[permutation]\nSPLIT_POINT = 6000\nX_train = X[0:SPLIT_POINT]\ny_train = y[0:SPLIT_POINT]\n\nX_test = X[SPLIT_POINT:]\ny_test = y[SPLIT_POINT:]\n\n\n",
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": 11
+    },
+    {
+     "cell_type": "heading",
+     "level": 1,
+     "metadata": {},
+     "source": "Train Classifier"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "nb = RidgeClassifier(alpha=0.3)\nnb.fit(X_train, y_train)\n",
+     "language": "python",
+     "metadata": {},
+     "outputs": [],
+     "prompt_number": "*"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "predictions1 = nb.predict(X_test)",
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    },
+    {
+     "cell_type": "heading",
+     "level": 1,
+     "metadata": {},
+     "source": "Evaluate"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "print \"Naive Bayes\"\nprint \"Accuracy :\\t%5.3f\" % accuracy_score(y_test, predictions1)\nprint \"Precision:\\t%5.3f\" % precision_score(y_test, predictions1)\nprint \"Recall   :\\t%5.3f\" % recall_score(y_test, predictions1)\nprint \"F1 Score :\\t%5.3f\" % f1_score(y_test, predictions1)\n",
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    },
+    {
+     "cell_type": "heading",
+     "level": 1,
+     "metadata": {},
+     "source": "Build Full Classifier (Using all data)"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "nb.fit(X, y)",
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    },
+    {
+     "cell_type": "heading",
+     "level": 1,
+     "metadata": {},
+     "source": "Persist Model"
+    },
+    {
+     "cell_type": "code",
+     "collapsed": false,
+     "input": "import joblib\njoblib.dump(vectorizer.arg1_vectorizer, 'vectorizer_arg1.pkl')\njoblib.dump(vectorizer.arg2_vectorizer, 'vectorizer_arg2.pkl')\njoblib.dump(vectorizer.rel_vectorizer, 'vectorizer_rel.pkl')\njoblib.dump(nb, 'naive_bayes.pkl')",
+     "language": "python",
+     "metadata": {},
+     "outputs": []
+    }
+   ],
+   "metadata": {}
+  }
+ ]
+}
