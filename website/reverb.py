@@ -14,13 +14,15 @@ from classifier import nb, vectorizer, classify_tuple
 class ReverbClassifier(object):
     def __init__(self, fname='reverb-latest.jar'):
         self.fname = fname
-
-    def get_tuples(self, list_of_sentences):
+        self.prime()
+    def prime(self):
         self.process = Popen(['java', '-jar', self.fname], stdin=PIPE, stdout=PIPE)
+    def get_tuples(self, list_of_sentences):
         self.data = StringIO.StringIO()
         out,error = self.process.communicate('\n'.join(list_of_sentences))
         self.data.write(out)
         self.data.seek(0)
+        self.prime()
         try:
             df = pd.read_csv(self.data, delimiter='\t', header=None, )
         except:
@@ -33,7 +35,7 @@ class ReverbClassifier(object):
             else:
                 yield(row['arg1'], row['rel'], row['arg2'], False)
             #print(row['arg1'], row['rel'], row['arg2'])
-            #print()
+
 if __name__ == "__main__":
     f = ReverbClassifier()
     df = f.get_tuples(['I ate a buffalo chicken sandwich, mate.',

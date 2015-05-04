@@ -17,8 +17,6 @@ app = Flask(__name__)
 
 @app.route('/')
 def main(id=0):
-
-
     return render_template('index.html')
 
 @app.route('/classify', methods=['POST'])
@@ -32,9 +30,8 @@ def classify():
         cleaned = ' '.join(words) + '.'
         out.append(cleaned)
     result = list(rev.get_tuples(out))
-    print(list(result))
     return jsonify(dict(zip(range(len(result)), result)))
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
