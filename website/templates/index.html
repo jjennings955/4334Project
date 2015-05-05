@@ -70,15 +70,15 @@ id is 0 if restaurant is not chosen yet
     <div class="container">
     <p>Enter a sentence or a paragraph in the text box below. Our system will attempt to extract all Menu Items
     mentioned in the entered paragraph. Below are a few examples to try (copy and paste into the form). Otherwise,
-        enter your own sentence. For best results, try to use proper punctuation and grammar!
+        enter your own sentence. For best results, try to use proper punctuation and grammar!</p>
     <br>
         <h2>A review taken from Fuzzy's Taco Shop in Arlington, TX</h2>
-        <code>
+        <code class="ex">
             I love this place! Everything is so tasty... from the breakfast to the cocktails. We eat here at least 2 times a week. I highly recommend the Chicken Chilaquiles with latin potatoes and refried beans, Grilled Shrimp Salad, the Taco platter is greatness too, just to name a few. The thing that keeps me coming back other than the wonderful food is that you can mix amd match, customize the menu to your taste and preference. That is huge for me considering I am gluten intolerant. Thanks, Fuzzy's!
         </code>
         <hr/>
         <h2>A review taken from The Grease Monkey in Arlington, TX</h2>
-        <code>
+        <code class="ex">
             If you want a really good burger and a nice cold beer this is the place for you. We come here about once a month and the burgers are some of the best I've had.
 
 This little burger joint / sports bar / dive bar is two separate business in one. One side of the place you order you food and the other side is the bar / eating area. I hear you can order food at the bar but I never have.
@@ -91,9 +91,9 @@ The bar is a full bar. I normally just get the beer. They have a wide assortment
 
 Good food and good beer, what more could you ask for.
         </code>
+        <button onclick="classify(this);">Classify!</button>
         <hr/>
-        <h2>A review taken from Buca Di Beppo Italian Restaurant in Southlake</h2>
-    </p>
+
         <hr>
 
         <div class="row">
@@ -141,6 +141,12 @@ Good food and good beer, what more could you ask for.
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script>
         $('#res-parent').hide();
+        $('.ex').each(function (i, obj) {
+            var txt = $(obj).text();
+            $(this).append($('<button></button').text('Copy').click(function() {
+                $('#comment').text(txt)
+            }));
+        });
         $('#submitbtn').click(function()
         {
             var output = '';
